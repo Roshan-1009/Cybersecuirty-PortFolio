@@ -1,0 +1,1 @@
+Disclaimer: These notes were compiled through voice chat and transcribed with the help of Claude AI (Anthropic). As a result, they may contain errors, mishearings, or inaccuracies. Please cross-reference with official TryHackMe material or other reliable sources before using them for study or reference purposes.
