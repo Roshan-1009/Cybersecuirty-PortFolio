@@ -1,0 +1,442 @@
+# TryHackMe — Pre-Security Path
+## Module 5: Cryptography
+
+> **Platform:** TryHackMe  
+> **Path:** Penetration Testing  
+> **Status:** ✅ Completed
+
+---
+
+## 📌 Overview
+
+This module covered the fundamentals of cryptography — from classical ciphers to modern encryption, hashing, digital signatures, and password cracking tools. These concepts are essential for understanding how data is protected and how attackers attempt to break that protection.
+
+---
+
+## 1. Introduction to Cryptography
+
+### Why We Need Cryptography
+Cryptography is used to protect three core properties:
+
+| Property | Description |
+|---|---|
+| **Confidentiality** | Ensures only intended parties can read the data |
+| **Integrity** | Ensures data has not been altered in transit |
+| **Authenticity** | Confirms the identity of who sent the data |
+
+### Real-World Examples
+- Logging into a website — credentials are encrypted before being sent to the server
+- SSH sessions — client and server establish an encrypted tunnel so no one can eavesdrop
+- Online banking — your browser verifies the server's certificate to confirm you're talking to the real bank and not an attacker
+
+> A standard for handling payment card data securely is known as **PCI DSS** (Payment Card Industry Data Security Standard).
+
+### Key Terms
+
+| Term | Description |
+|---|---|
+| **Plaintext** | Original readable data before encryption |
+| **Ciphertext** | Encrypted data that cannot be read without a key |
+| **Encryption** | Converting plaintext → ciphertext using a key |
+| **Decryption** | Converting ciphertext → plaintext using a key |
+
+---
+
+## 2. Historical Ciphers
+
+### Caesar Cipher
+One of the oldest encryption methods — shifts each letter in the message by a fixed number of positions in the alphabet (left or right shift).
+
+> No longer used — it is easily broken with basic math and brute force (only 25 possible shifts).
+
+---
+
+## 3. Symmetric Encryption
+
+Also known as **private key cryptography** — both parties use the **same shared secret key** to encrypt and decrypt data.
+
+### How It Works
+1. Sender encrypts the message using the shared key
+2. Sends the ciphertext to the recipient
+3. Recipient decrypts using the same shared key
+
+### The Problem
+Sharing the key securely is the major challenge — if the key is intercepted over the Internet, an attacker can decrypt all communication.
+
+### Common Symmetric Algorithms
+
+| Algorithm | Full Name | Notes |
+|---|---|---|
+| **DES** | Data Encryption Standard | Outdated; too weak by modern standards |
+| **3DES** | Triple Data Encryption Standard | Applies DES three times; stronger but slow |
+| **AES** | Advanced Encryption Standard | Current gold standard; fast and secure |
+
+---
+
+## 4. Asymmetric Encryption
+
+Also known as **public key cryptography** — uses a **pair of mathematically related keys**: a public key and a private key.
+
+### How It Works (Alice & Bob Example)
+1. Bob generates a **public key** and a **private key**
+2. Bob shares his **public key** openly
+3. Alice encrypts her message using **Bob's public key**
+4. Only Bob can decrypt it using his **private key**
+
+> The public key encrypts; the private key decrypts. The two keys are mathematically related but you cannot derive one from the other.
+
+### Analogy
+Think of it like a **lockbox** — anyone can drop a message in using the public key (lock), but only the owner can open it with their private key.
+
+---
+
+## 5. RSA (Rivest–Shamir–Adleman)
+
+RSA is based on the mathematically difficult problem of **factoring large numbers**. Multiplying two large prime numbers is easy, but finding the original prime factors of their product is computationally expensive.
+
+### How RSA Works (Simplified)
+
+1. Bob chooses two prime numbers **p** and **q**
+2. Calculates **n = p × q**
+3. Computes the **totient function**: φ(n) = (p−1)(q−1)
+4. Selects integer **e** that is relatively prime to φ(n)
+5. Calculates **d** such that: `e × d ≡ 1 mod φ(n)`
+6. **Public key** = (n, e) — shared openly
+7. **Private key** = (n, d) — kept secret
+
+### Encryption & Decryption
+- Alice encrypts value x: `y = x^e mod n`
+- Bob decrypts received value y: `x = y^d mod n`
+
+> RSA is commonly featured in CTF (Capture The Flag) challenges where you calculate variables or break encryption based on the math above.
+
+---
+
+## 6. Diffie-Hellman Key Exchange
+
+A method that allows two parties to establish a **shared secret key over an insecure channel** without having a pre-existing shared secret — and without an observer being able to determine the key.
+
+### How It Works (Simplified)
+1. Alice and Bob publicly agree on values **g** (generator) and **p** (prime)
+2. Alice privately chooses secret **a**; Bob privately chooses secret **b**
+3. Alice computes and sends: `A = g^a mod p`
+4. Bob computes and sends: `B = g^b mod p`
+5. Alice computes: `s = B^a mod p`; Bob computes: `s = A^b mod p`
+6. Both arrive at the **same shared secret s** — without ever transmitting it directly
+
+> The shared secret can then be used as a key for symmetric encryption.
+
+---
+
+## 7. SSH Key Authentication
+
+When you first connect to an SSH server, the client checks the server's **public key fingerprint** and asks:
+> "Are you sure you want to connect? Fingerprint: `xx:xx:xx...`"
+
+This confirms you are connecting to the correct server before sending any credentials.
+
+### SSH Key Algorithms
+
+| Algorithm | Description |
+|---|---|
+| **RSA** | Default SSH key type; based on prime factoring |
+| **DSA** | Digital Signature Algorithm; designed specifically for digital signatures |
+| **ECDSA** | Elliptic Curve DSA; smaller key sizes for equivalent security |
+| **ECDSA-SK** | ECDSA with a hardware security key |
+
+### Generating SSH Keys
+```bash
+ssh-keygen                    # Generate default RSA key pair
+man ssh-keygen                # Full manual with all options
+```
+
+### SSH Private Key Security
+- Treat SSH private keys **like passwords — never share them**
+- Keys are stored in `~/.ssh/id_rsa` (private) and `~/.ssh/id_rsa.pub` (public)
+- Set correct permissions — only the owner should be able to read/write the private key:
+```bash
+chmod 600 ~/.ssh/id_rsa
+```
+- A **passphrase** can be added to encrypt the private key locally — it never leaves your system and is never transmitted
+
+---
+
+## 8. Digital Signatures
+
+Digital signatures provide a way to verify the **authenticity** and **integrity** of a digital message or document.
+
+### How It Works
+1. Sender signs the document using their **private key**
+2. Recipient verifies the signature using the sender's **public key**
+3. If the signature matches, the document is confirmed as authentic and unmodified
+
+> In many modern countries, digital signatures carry the **same legal value** as physical signatures.
+
+---
+
+## 9. PGP & GPG
+
+| Tool | Full Name | Purpose |
+|---|---|---|
+| **PGP** | Pretty Good Privacy | Software implementing encryption for files, emails, and digital signatures |
+| **GPG** | GNU Privacy Guard | Open-source implementation of PGP |
+
+### Common GPG Usage
+```bash
+gpg --gen-key                          # Generate a GPG key pair
+gpg --export <key-id> > public.key     # Export public key to share
+gpg --encrypt --recipient <email> file # Encrypt a file for a recipient
+gpg --decrypt file.gpg                 # Decrypt a file using your private key
+```
+
+> GPG is widely used to encrypt and sign email messages. Always keep a backup of your GPG keys in a secure location.
+
+---
+
+## 10. Hashing Basics
+
+### What is a Hash Function?
+A hash function takes an input of **any size** and produces a **fixed-size output** (the hash/digest).
+
+Key properties:
+- **One-way** — impossible to reverse the output back to the input
+- **Deterministic** — same input always produces the same output
+- **Avalanche effect** — even a single bit change in the input causes a completely different output
+- **Fast to compute** but slow to reverse
+- No key is involved (unlike encryption)
+
+> Hashing is mainly used for **integrity verification** and **secure password storage**.
+
+### Common Hash Algorithms
+
+| Algorithm | Full Name | Notes |
+|---|---|---|
+| **MD5** | Message Digest 5 | Fast but broken; not recommended for security |
+| **SHA-1** | Secure Hash Algorithm 1 | Deprecated; collision vulnerabilities found |
+| **SHA-256** | Secure Hash Algorithm 256-bit | Current standard; widely used |
+| **NTLM** | NT LAN Manager | Used for Windows authentication |
+
+### Hash Collisions
+A **collision** occurs when two different inputs produce the same hash output. This is caused by the **pigeonhole effect** — there are infinite possible inputs but a finite number of possible hash outputs. This is why older algorithms like MD5 and SHA-1 are no longer considered secure.
+
+---
+
+## 11. Password Storage & Salting
+
+### Insecure Password Storage Practices
+- Storing passwords in **plaintext**
+- Using **deprecated encryption** algorithms
+- Using **weak/insecure hashing** algorithms (e.g. MD5 without salt)
+
+### How Secure Password Hashing Works
+1. User sets a password
+2. System hashes the password and stores only the hash
+3. On login, the system hashes the submitted password and compares it to the stored hash
+4. **Passwords are never stored or transmitted in plaintext**
+
+### Password Salting
+A **salt** is a random value added to a password before hashing — making every hash unique even if two users have the same password.
+
+```
+hash(password + salt) → stored hash
+```
+
+- Salts are **not secret** — they are stored alongside the hash
+- Salting defeats **rainbow table attacks** (pre-computed hash databases)
+- Tools like **bcrypt** and **scrypt** handle salting automatically
+
+### Rainbow Tables
+Pre-computed databases of hash → password mappings used to crack unsalted hashes quickly.
+
+**Online tools for cracking unsalted hashes:**
+- [CrackStation](https://crackstation.net)
+- [Hashes.com](https://hashes.com)
+
+### Secure Hashing Algorithms for Passwords
+
+| Algorithm | Notes |
+|---|---|
+| **bcrypt** | Widely used; slow by design to resist brute force |
+| **scrypt** | Memory-hard; resistant to GPU attacks |
+| **Argon2** | Winner of the Password Hashing Competition; highly recommended |
+
+---
+
+## 12. Recognizing Password Hashes
+
+Different hashing algorithms produce hashes with recognizable patterns. Understanding these helps identify which algorithm was used.
+
+| Hash Format | Algorithm |
+|---|---|
+| `$1$...` | MD5-crypt |
+| `$2y$...` / `$2b$...` | bcrypt |
+| `$6$...` | SHA-512-crypt |
+| `$y$...` | yescrypt |
+| 32 hex characters | MD5 |
+| 40 hex characters | SHA-1 |
+| 64 hex characters | SHA-256 |
+
+> Automated tools like **hash-identifier** can help, but learning to recognize hashes manually is an important skill.
+
+---
+
+## 13. HMAC (Hash-based Message Authentication Code)
+
+**HMAC** is a type of message authentication code that combines a **cryptographic hash function** with a **secret key** to verify both the **authenticity** and **integrity** of data.
+
+```
+HMAC = Hash(secret_key + message)
+```
+
+> Unlike a plain hash, HMAC requires the secret key — making it resistant to tampering.
+
+---
+
+## 14. Password Cracking Tools
+
+### John the Ripper
+
+A powerful open-source password cracking tool supporting many hash formats.
+
+**Basic syntax:**
+```bash
+john [options] <hash_file>
+```
+
+**Common options:**
+
+| Option | Purpose |
+|---|---|
+| `--wordlist=<path>` | Use a wordlist for dictionary attack |
+| `--format=<format>` | Specify the hash format (e.g. `--format=md5`) |
+| `--format=NT` | Used for Windows NTLM passwords |
+
+**Example:**
+```bash
+john --wordlist=/usr/share/wordlists/rockyou.txt hashes.txt
+john --wordlist=wordlist.txt --format=md5 hashes.txt
+```
+
+### Hashcat
+
+An alternative GPU-accelerated password cracking tool. Requires specifying a **hash mode number** instead of a format name.
+
+```bash
+hashcat -m <mode> <hash_file> <wordlist>
+```
+
+> Common mode numbers: `0` = MD5, `1000` = NTLM, `1800` = SHA-512, `3200` = bcrypt
+
+---
+
+## 15. John the Ripper — Advanced Usage
+
+### unshadow
+Combines `/etc/passwd` (user account info) and `/etc/shadow` (hashed passwords) into a single crackable file.
+
+```bash
+unshadow /etc/passwd /etc/shadow > unshadowed.txt
+john unshadowed.txt
+```
+
+### Single Crack Mode
+Uses account information (like username) to generate password guesses — e.g. if the username is `alice`, it tries `alice123`, `alice321`, `Alice1`, etc.
+
+```bash
+john --single hashes.txt
+```
+
+### Custom / Complex Passwords (Polo Password)
+John can be configured with rules to generate passwords that meet complexity requirements — uppercase, lowercase, numbers, special characters — useful for cracking passwords with known policies.
+
+---
+
+## 16. Cracking Specific File Types
+
+### zip2john — Cracking ZIP Files
+Converts a password-protected ZIP file into a crackable hash format.
+
+```bash
+zip2john [options] <zipfile> > output.txt
+john output.txt
+```
+
+### rar2john — Cracking RAR Files
+Same process for RAR archives — convert to hash, then crack with John.
+
+```bash
+rar2john <rarfile> > output.txt
+john output.txt
+```
+
+### ssh2john — Cracking SSH Private Keys
+Converts an encrypted SSH private key (`id_rsa`) into a crackable hash format.
+
+```bash
+ssh2john id_rsa > id_rsa.hash
+john id_rsa.hash
+```
+
+---
+
+## 17. SecLists
+
+**SecLists** is a popular GitHub repository containing collections of wordlists, usernames, passwords, fuzzing strings, and more — essential for penetration testing.
+
+🔗 [github.com/danielmiessler/SecLists](https://github.com/danielmiessler/SecLists)
+
+```bash
+# Install on Kali/Debian
+sudo apt install seclists
+```
+
+> Commonly used wordlist: `/usr/share/wordlists/rockyou.txt`
+
+---
+
+## 🛠️ Tools Reference
+
+| Tool | Purpose |
+|---|---|
+| `john` | Password hash cracking (John the Ripper) |
+| `hashcat` | GPU-accelerated hash cracking |
+| `unshadow` | Combine `/etc/passwd` and `/etc/shadow` for cracking |
+| `zip2john` | Convert ZIP files to crackable hash format |
+| `rar2john` | Convert RAR files to crackable hash format |
+| `ssh2john` | Convert SSH private keys to crackable hash format |
+| `gpg` | Encrypt, decrypt, and sign files using PGP/GPG |
+| `ssh-keygen` | Generate SSH key pairs |
+| CrackStation | Online rainbow table lookup |
+| Hashes.com | Online hash cracker |
+| SecLists | Wordlist repository for attacks |
+
+---
+
+## 📚 Key Concepts Learned
+
+- Why cryptography is needed — confidentiality, integrity, authenticity
+- Plaintext vs ciphertext; encryption vs decryption
+- Caesar cipher — historical context; no longer secure
+- Symmetric encryption — shared key; DES, 3DES, AES
+- Asymmetric encryption — public/private key pairs; Alice & Bob model
+- RSA — based on prime factoring; public key (n,e) and private key (n,d)
+- Diffie-Hellman key exchange — establishing shared secrets over insecure channels
+- SSH key authentication — fingerprint verification, key algorithms (RSA, DSA, ECDSA)
+- SSH private key security — permissions, passphrases, never sharing private keys
+- Digital signatures — signing with private key, verifying with public key
+- PGP/GPG — encrypting and signing files and emails
+- Hash functions — one-way, fixed output, avalanche effect
+- Common algorithms — MD5, SHA-1, SHA-256, NTLM
+- Hash collisions and the pigeonhole effect
+- Secure password storage — hashing + salting defeats rainbow tables
+- bcrypt, scrypt, Argon2 for secure password hashing
+- HMAC — hash + secret key for authenticity and integrity
+- Recognizing hash formats by their patterns
+- John the Ripper — wordlist, format, single mode, unshadow
+- Hashcat — GPU cracking with mode numbers
+- Cracking ZIP, RAR, and SSH keys using *2john tools
+- SecLists — go-to wordlist repository
+
+---
+
+*Notes from hands-on learning on TryHackMe. All labs performed in a legal, controlled environment.*
