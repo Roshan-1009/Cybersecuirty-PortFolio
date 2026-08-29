@@ -1,0 +1,22 @@
+## Horizontal Privilege Escalation = — PortSwigger Web Security Academy
+
+## Tools used:None
+
+## The Vulnerability
+This is called the Horizontal Privilage vulnerability,in this lab,this could be also encountered as IDOR.
+Developers give access to users using insecure id's as user-controllable parameters.Sometimes,developers use GUID's
+globally unique identifers just like obfuscation.But this guid's can be extracted from reviews,posts of the victim.
+
+## How I Found It
+I found the victim's post and viewed the page source.There you can extract the guid for further exploit
+
+## The Exploit
+After fiinding the guid of `carlos` ,yoou can paste it after logging in as wiener.later pasting the guid into 
+`myaccountid=?`
+
+## What I Learned
+This is the reason of why `Server-Side authentication` is needful.Never trust client side and let users access other account information through ids' which are `user-request parameters`
+
+## How to Defend Against It
+Never trust the user(Client-Side),always prioritze a server-side authentication.
+As i said,all of these include as obfuscation,which does delay the attack but not so long.
