@@ -1,6 +1,6 @@
 # File path traversal, simple case — PortSwigger Web Security Academy
 
-Tools used:Burp Suite
+## Tools used:Burp Suite
 
 ## The Vulnerability
 This is called the path traversal vulnerability,where you can change the url's by manipulating the get request in burp suite

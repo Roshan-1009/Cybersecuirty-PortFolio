@@ -1,4 +1,4 @@
-# File path traversal, traversal sequences blocked with absolute path bypass — PortSwigger Web Security Academy
+# File path traversal, traversal sequences stripped non-recursively — PortSwigger Web Security Academy
 
 ## Tools used:Burp Suite
 
@@ -9,7 +9,7 @@ This is called the path traversal vulnerability,where you can change the url's b
 Go to HTTP History after visiting the website,there you might see GET /image?filename=22.jpg HTTP/2 or something similar
 
 ## The Exploit
-Change the `filename=/etc/passwd` replacing the imagename.This will change the directory to the root and enter etc/passwd effectively.This gives us the access to the passwords or password hashes.
+Here,the developers made it a bit challenging trying to strip away any parameters `../`.So inorder to bypass any traversal,we could add an extra traversal sequence ultimately turning the sequence into `....//`.Change the `filename=....//....//....//etc/passwd` replacing the imagename.This will change the directory to the root and enter etc/passwd effectively.This gives us the access to the passwords or password hashes.
 
 ## What I Learned
 If the similar requests are not shown in the HTTP history,you might need to turn off the filter and recheck them,I missed the request and was confused for a while.
