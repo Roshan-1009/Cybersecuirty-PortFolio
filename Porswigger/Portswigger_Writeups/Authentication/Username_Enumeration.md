@@ -1,6 +1,6 @@
 ## Username Enumeration = — PortSwigger Web Security Academy
 
-## Tools used:Burp Suite
+## Tools used:Burp Suite-Intruder
 
 ## The Vulnerability
 Username Enumeration using different usernames.If website signals the user differently based on the credentials,
